@@ -7,6 +7,7 @@ import javafx.scene.layout.AnchorPane;
 
 import org.jabref.gui.commonfxcontrols.CitationKeyPatternsPanel;
 import org.jabref.gui.preferences.AbstractPreferenceTabView;
+import org.jabref.gui.preferences.forms.FormMetrics;
 import org.jabref.logic.l10n.Localization;
 import org.jabref.model.entry.BibEntryTypesManager;
 
@@ -18,6 +19,10 @@ public class CitationKeyPatternTab extends AbstractPreferenceTabView<CitationKey
     private static final String REGEX_HELP_URL = KEY_PATTERNS_HELP_URL + "#replace-via-regular-expression";
 
     private final CitationKeyPatternsPanel keyPatternsPanel = new CitationKeyPatternsPanel();
+
+    /// Also the source of the table's row height: it is a themed control in the tree, so its font
+    /// tracks the configured font size.
+    private final Label tableNote = new Label(Localization.lang("( Note: Press return to commit changes in the table! )"));
 
     public CitationKeyPatternTab() {
         this.viewModel = new CitationKeyPatternTabViewModel(
@@ -64,7 +69,7 @@ public class CitationKeyPatternTab extends AbstractPreferenceTabView<CitationKey
                         .checkbox(Localization.lang("Transliterate fields that are used for generating the citation key"), viewModel.transliterateFieldsForCitationKeyProperty()))
 
                 .section(Localization.lang("Key patterns"), patterns -> patterns
-                                .label(Localization.lang("( Note: Press return to commit changes in the table! )"))
+                                .custom(tableNote)
                                 .custom(buildKeyPatternsRegion()),
                         patternsSection -> patternsSection.help(KEY_PATTERNS_HELP_URL))
 
@@ -75,7 +80,9 @@ public class CitationKeyPatternTab extends AbstractPreferenceTabView<CitationKey
     private Node buildKeyPatternsRegion() {
         keyPatternsPanel.patternListProperty().bindBidirectional(viewModel.patternListProperty());
         keyPatternsPanel.defaultKeyPatternProperty().bindBidirectional(viewModel.defaultKeyPatternProperty());
-        keyPatternsPanel.setPrefHeight(180.0);
+        // The list is replaced wholesale by setValues(), so the row count comes from the property
+        // rather than from the table's current items.
+        FormMetrics.sizeToContent(keyPatternsPanel, viewModel.patternListProperty().sizeProperty(), tableNote);
         AnchorPane.setLeftAnchor(keyPatternsPanel, 0.0);
         AnchorPane.setRightAnchor(keyPatternsPanel, 0.0);
 

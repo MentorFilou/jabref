@@ -5,7 +5,6 @@ import java.util.Optional;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.binding.Bindings;
-import javafx.beans.binding.DoubleBinding;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
@@ -21,6 +20,7 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 
 import org.jabref.gui.preferences.AbstractPreferenceTabView;
+import org.jabref.gui.preferences.forms.FormMetrics;
 import org.jabref.gui.preferences.forms.PreferencesFormBuilder;
 import org.jabref.gui.util.component.HelpButton;
 import org.jabref.logic.ai.preferences.AiPreferences;
@@ -30,15 +30,6 @@ import org.jabref.logic.l10n.Localization;
 import org.jabref.logic.util.strings.StringUtil;
 
 public class WebSearchTab extends AbstractPreferenceTabView<WebSearchTabViewModel> {
-
-    // Multiplier for row height based on font size
-    private static final double FONT_HEIGHT_MULTIPLIER = 2.5;
-
-    // Default row height if font is not available
-    private static final double DEFAULT_ROW_HEIGHT = 30.0;
-
-    // Estimate for header height (used in table prefHeight calculation)
-    private static final double HEADER_HEIGHT_ESTIMATE = 1.1;
 
     private final VBox fetchersContainer = new VBox();
 
@@ -166,15 +157,7 @@ public class WebSearchTab extends AbstractPreferenceTabView<WebSearchTabViewMode
         table.getColumns().add(name);
         table.getColumns().add(urlTemplate);
 
-        // Size the table to its content so it never scrolls inside the already scrolling dialog.
-        DoubleBinding rowHeight = Bindings.createDoubleBinding(
-                () -> tableNote.getFont() != null ? tableNote.getFont().getSize() * FONT_HEIGHT_MULTIPLIER : DEFAULT_ROW_HEIGHT,
-                tableNote.fontProperty());
-        table.fixedCellSizeProperty().bind(rowHeight);
-        table.prefHeightProperty().bind(
-                Bindings.size(table.getItems())
-                        .add(HEADER_HEIGHT_ESTIMATE)
-                        .multiply(rowHeight));
+        FormMetrics.sizeToContent(table, Bindings.size(table.getItems()), tableNote);
         return table;
     }
 
